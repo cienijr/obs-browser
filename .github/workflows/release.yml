@@ -33,6 +33,7 @@ jobs:
       with:
         path: obs-studio/plugin/obs-browser
         submodules: recursive
+        ref: mac-fix-webrtc
 
     - name: Install OBS Dependencies
       run: |

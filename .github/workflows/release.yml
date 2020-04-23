@@ -1,0 +1,67 @@
+name: Release
+
+on:
+  push:
+    branches:
+    - mac-fix-webrtc
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout obs-studio
+      uses: actions/checkout@v2
+      with:
+        repository: obsproject/obs-studio
+        path: obs-studio
+        submodules: recursive
+        ref: 25.0.7
+
+    - name: Remove current obs-browser
+      run: |
+        rm -rf obs-studio/plugin/obs-browser
+        mkdir -p obs-studio/plugin/obs-browser
+
+    - name: Checkout obs-browser
+      uses: actions/checkout@v2
+      with:
+        path: obs-studio/plugin/obs-browser
+        submodules: recursive
+
+    - name: Install OBS Dependencies
+      run: |
+        cd obs-studio
+        ./CI/install-dependencies-osx.sh
+        
+    - name: Cmake
+      run: |
+        cd obs-studio
+        ./CI/before-script-osx.sh
+
+    - name: Build
+      run: |
+        cd obs-studio
+
+        set -e
+        cd ./build
+        make -j4
+
+    - name: Copy artifacts
+      run: |
+        mkdir -p artifacts
+
+        cp obs-studio/build/rundir/RelWithDebInfo/obs-plugins/obs-browser.so artifacts/
+        cp obs-studio/build/rundir/RelWithDebInfo/obs-plugins/obs-browser-page artifacts/
+    
+    - name: Fix runtime QT deps
+      run: |
+        install_name_tool -change /usr/local/opt/qt/lib/QtGui.framework/Versions/5/QtGui @executable_path/../Frameworks/QtGui.framework/Versions/5/QtGui artifacts/obs-browser.so
+        install_name_tool -change /usr/local/opt/qt/lib/QtCore.framework/Versions/5/QtCore @executable_path/../Frameworks/QtCore.framework/Versions/5/QtCore artifacts/obs-browser.so
+        install_name_tool -change /usr/local/opt/qt/lib/QtWidgets.framework/Versions/5/QtWidgets @executable_path/../Frameworks/QtWidgets.framework/Versions/5/QtWidgets artifacts/obs-browser.so
+
+    - uses: actions/upload-artifact@v1
+      with:
+        name: obs-browser
+        path: artifacts
+

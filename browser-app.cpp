@@ -87,7 +87,7 @@ void BrowserApp::OnBeforeCommandLineProcessing(
 			command_line->GetSwitchValue("disable-features");
 		disableFeatures += ",HardwareMediaKeyHandling"
 #ifdef __APPLE__
-				   ",NetworkService"
+				   // ",NetworkService"
 #endif
 			;
 		command_line->AppendSwitchWithValue("disable-features",
@@ -96,7 +96,7 @@ void BrowserApp::OnBeforeCommandLineProcessing(
 		command_line->AppendSwitchWithValue("disable-features",
 						    "HardwareMediaKeyHandling"
 #ifdef __APPLE__
-						    ",NetworkService"
+						    // ",NetworkService"
 #endif
 		);
 	}
